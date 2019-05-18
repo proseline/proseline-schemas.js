@@ -14,6 +14,7 @@ var nonce = hexString(NONCE_BYTES)
 // Schemas represent byte strings as hex strings.
 function hexString (bytes) {
   var returned = {
+    title: 'hexadecimal string',
     type: 'string',
     pattern: '^[a-f0-9]+$'
   }
@@ -27,9 +28,9 @@ var GENERICHASH_BYTES = sodium.crypto_generichash_BYTES
 
 var project = hexString(GENERICHASH_BYTES)
 var digest = hexString(GENERICHASH_BYTES)
-var timestamp = { type: 'string', format: 'date-time' }
-var name = { type: 'string', minLength: 1, maxLength: 256 }
-var noteText = { type: 'string', minLength: 1 }
+var timestamp = { title: 'timestamp', type: 'string', format: 'date-time' }
+var name = { title: 'name', type: 'string', minLength: 1, maxLength: 256 }
+var noteText = { title: 'note text', type: 'string', minLength: 1 }
 
 // Log Entry Types
 
@@ -49,6 +50,8 @@ var draft = strictObjectSchema({
   timestamp: timestamp
 })
 
+draft.title = 'draft'
+
 // Marks record when a user moves a named marker onto a
 // specific draft.
 var mark = strictObjectSchema({
@@ -66,6 +69,8 @@ var mark = strictObjectSchema({
   draft: digest
 })
 
+mark.title = 'mark'
+
 // Notes store comments to drafts, as well as replies to
 // other notes.  This schema represents a note to a draft.
 var note = strictObjectSchema({
@@ -82,6 +87,8 @@ var note = strictObjectSchema({
   timestamp: timestamp
 })
 
+note.title = 'note'
+
 var reply = strictObjectSchema({
   type: { const: 'note' },
   draft: digest,
@@ -93,6 +100,8 @@ var reply = strictObjectSchema({
   timestamp: timestamp
 })
 
+reply.title = 'reply'
+
 // Corrections update the text of notes.
 var correction = strictObjectSchema({
   type: { const: 'correction' },
@@ -100,6 +109,8 @@ var correction = strictObjectSchema({
   text: noteText,
   timestamp: timestamp
 })
+
+correction.title = 'correction'
 
 // Notes associates names and device, like "Kyle on laptop"
 // with logs.
@@ -109,6 +120,8 @@ var intro = strictObjectSchema({
   device: name,
   timestamp: timestamp
 })
+
+intro.title = 'intro'
 
 var messages = { correction, draft, intro, mark, note, reply }
 
@@ -128,6 +141,8 @@ var innerEnvelope = {
   ],
   additionalProperties: false
 }
+
+innerEnvelope.title = 'inner envelope'
 
 var outerEnvelope = strictObjectSchema({
   project: project,
@@ -153,6 +168,8 @@ var outerEnvelope = strictObjectSchema({
   }
 })
 
+outerEnvelope.title = 'outer envelope'
+
 // References
 
 // References point to particular log entries by log public
@@ -162,6 +179,8 @@ var reference = strictObjectSchema({
   publicKey: publicKey,
   index: { type: 'integer', minimum: 0 }
 })
+
+reference.title = 'reference'
 
 module.exports = {
   // messages: messages,
