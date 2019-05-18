@@ -14,23 +14,36 @@ assert(typeof schemas.outerEnvelope === 'object')
 assert(typeof schemas.invitation === 'object')
 ```
 
-## Schema Overview
+## Overview
 
 ```
 +----------------------------------------------------------+
 | Outer Envelope                                           |
+| + JSON-encoded                                           |
+| + sent via channel encrypted with replication key        |
+|                                                          |
 | - project discovery key                                  |
 | - log public key                                         |
 | - log entry index                                        |
 | - random inner envelope encryption nonce                 |
+|                                                          |
 | +------------------------------------------------------+ |
-| | Inner Envelope (encrypted with project shared key)   | |
+| | Inner Envelope                                       | |
+| | + keys sorted                                        | |
+| | + JSON-encoded                                       | |
+| | + encrypted with project shared key                  | |
+| | + Base64-encoded                                     | |
+| |                                                      | |
 | | - signature with log keypair                         | |
 | | - signature with project write keypair               | |
+| | - digest of prior log entry (log entry index > 0)    | |
 | | - (optional) signature with client keypair           | |
-| | - (optional) digest of prior log entry               | |
+| |                                                      | |
 | | +--------------------------------------------------+ | |
-| | | Message (JSON, keys sorted)                      | | |
+| | | Message                                          | | |
+| | | + keys sorted                                    | | |
+| | | + JSON-encoded                                   | | |
+| | |                                                  | | |
 | | | One Of:                                          | | |
 | | | - draft                                          | | |
 | | | - mark                                           | | |
