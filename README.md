@@ -24,7 +24,7 @@ assert(typeof schemas.invitation === 'object')
 |                                                          |
 | - project discovery key                                  |
 | - log public key                                         |
-| - log entry index                                        |
+| - log entry index (>= 0)                                 |
 | - random inner envelope encryption nonce                 |
 |                                                          |
 | +------------------------------------------------------+ |
