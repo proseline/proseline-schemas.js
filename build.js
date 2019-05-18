@@ -156,12 +156,12 @@ var outerEnvelope = strictObjectSchema({
       var CHARS = '[A-Za-z0-9+/]'
       return (
         '^' +
-        '(' + CHARS + '{4})*' +
-        '(' +
-        CHARS + '{2}==' +
-        '|' +
-        CHARS + '{3}=' +
-        ')' +
+          '(' + CHARS + '{4})*' +
+          '(' +
+            CHARS + '{2}==' +
+            '|' +
+            CHARS + '{3}=' +
+          ')' +
         '$'
       )
     })()
