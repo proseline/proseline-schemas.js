@@ -2,6 +2,8 @@
 
 JSON schemas for Proseline data messages
 
+## JavaScript Module
+
 ```javascript
 var schemas = require('@proseline/schemas')
 var assert = require('assert')
@@ -11,6 +13,8 @@ assert(typeof schemas.innerEnvelope === 'object')
 assert(typeof schemas.outerEnvelope === 'object')
 assert(typeof schemas.invitation === 'object')
 ```
+
+## Schema Overview
 
 ```
 +----------------------------------------------------------+
