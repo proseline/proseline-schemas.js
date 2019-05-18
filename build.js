@@ -171,7 +171,7 @@ var outerEnvelope = strictObjectSchema({
             CHARS + '{2}==' +
             '|' +
             CHARS + '{3}=' +
-          ')' +
+          ')?' +
         '$'
       )
     })()
