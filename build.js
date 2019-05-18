@@ -26,7 +26,11 @@ function hexString (bytes) {
     type: 'string',
     pattern: '^[a-f0-9]+$'
   }
-  if (bytes) returned.length = bytes
+  if (bytes) {
+    var characters = bytes * 2
+    returned.minLength = characters
+    returned.maxLength = characters
+  }
   return returned
 }
 
