@@ -182,8 +182,30 @@ var reference = strictObjectSchema({
 
 reference.title = 'reference'
 
+var invitation = {
+  type: 'object',
+  properties: {
+    replicationKeyCiphertext: hexString(96),
+    replicationKeyNonce: nonce,
+    readKeyCiphertext: hexString(96),
+    readKeyNonce: nonce,
+    writeSeedCiphertext: hexString(96), // optional
+    writeSeedNonce: nonce, // optional
+    titleCiphertext: hexString(), // optional
+    titleNonce: nonce // optional
+  },
+  required: [
+    'replicationKeyCiphertext',
+    'replicationKeyNonce',
+    'readKeyCiphertext',
+    'readKeyNonce'
+  ],
+  additionalProperties: false
+}
+
 module.exports = {
   // messages: messages,
+  invitation: invitation,
   reference: reference,
   innerEnvelope: innerEnvelope,
   outerEnvelope: outerEnvelope
