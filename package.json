@@ -18,6 +18,7 @@
   },
   "scripts": {
     "build": "node -e 'console.log(JSON.stringify(require(\"sort-keys\")(require(\"./build\"), {deep: true}), null, 2))' > index.json",
+    "pretest": "npm run build",
     "test": "npm run test:suite && npm run test:readme",
     "test:suite": "node test.js",
     "test:readme": "defence -i javascript README.md | replace-require-self | node"
