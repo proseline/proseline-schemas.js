@@ -1,21 +1,9 @@
-var sodium = require('sodium-universal')
+var crypto = require('@proseline/crypto')
 var strictObjectSchema = require('strict-json-object-schema')
 
-var BOX_NONCE_BYTES = sodium.crypto_secretbox_NONCEBYTES
-var BOX_MAC_BYTES = sodium.crypto_secretbox_MACBYTES
-var BOX_KEY_BYTES = sodium.crypto_secretbox_KEYBYTES
-
-var SIGN_BYTES = sodium.crypto_sign_BYTES
-var SIGN_PUBLICKEYBYTES = sodium.crypto_sign_PUBLICKEYBYTES
-var SIGN_SEED_BYTES = sodium.crypto_sign_SEEDBYTES
-
-var STREAM_KEY_BYTES = sodium.crypto_stream_KEYBYTES
-
-var GENERICHASH_BYTES = sodium.crypto_generichash_BYTES
-
-var publicKey = hexString(SIGN_PUBLICKEYBYTES)
-var signature = hexString(SIGN_BYTES)
-var nonce = hexString(BOX_NONCE_BYTES)
+var publicKey = hexString(crypto.signingPublicKeyBytes)
+var signature = hexString(crypto.signatureBytes)
+var nonce = hexString(crypto.nonceBytes)
 
 // Schemas represent byte strings as hex strings.
 function hexString (bytes) {
@@ -34,8 +22,8 @@ function hexString (bytes) {
 
 // JSON Schemas reused below:
 
-var project = hexString(GENERICHASH_BYTES)
-var digest = hexString(GENERICHASH_BYTES)
+var project = hexString(crypto.hashBytes)
+var digest = hexString(crypto.hashBytes)
 
 var timestamp = {
   title: 'timestamp',
@@ -217,11 +205,20 @@ reference.title = 'reference'
 var invitation = {
   type: 'object',
   properties: {
-    replicationKeyCiphertext: hexString(STREAM_KEY_BYTES + BOX_MAC_BYTES),
+    replicationKeyCiphertext: hexString(
+      crypto.projectReplicationKeyBytes +
+      crypto.encryptionMACBytes
+    ),
     replicationKeyNonce: nonce,
-    readKeyCiphertext: hexString(BOX_KEY_BYTES + BOX_MAC_BYTES),
+    readKeyCiphertext: hexString(
+      crypto.projectReadKeyBytes +
+      crypto.encryptionMACBytes
+    ),
     readKeyNonce: nonce,
-    writeSeedCiphertext: hexString(SIGN_SEED_BYTES + BOX_MAC_BYTES), // optional
+    writeSeedCiphertext: hexString(
+      crypto.signingKeyPairSeedBytes +
+      crypto.encryptionMACBytes
+    ), // optional
     writeSeedNonce: nonce, // optional
     titleCiphertext: hexString(), // optional
     titleNonce: nonce // optional
