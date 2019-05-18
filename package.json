@@ -6,16 +6,15 @@
   "repository": "proseline/proseline-schemas.js",
   "license": "SEE LICENSE IN LICENSE",
   "files": [
-    "index.js"
+    "index.json"
   ],
-  "dependencies": {
-    "sodium-universal": "^2.0.0",
-    "strict-json-object-schema": "^1.1.0"
-  },
   "devDependencies": {
+    "sodium-universal": "^2.0.0",
+    "strict-json-object-schema": "^1.1.0",
     "ajv": "^6.10.0"
   },
   "scripts": {
+    "build": "node -e 'console.log(JSON.stringify(require(\"./build\"), null, 2))' > index.json",
     "test": "node test.js"
   }
 }
