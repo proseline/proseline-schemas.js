@@ -157,8 +157,8 @@ var outerEnvelope = strictObjectSchema({
       return (
         '^' +
         `(${CHARS}{4})*` +
-        `(' +
-        '${CHARS}{2}==` +
+        '(' +
+        `${CHARS}{2}==` +
         '|' +
         `${CHARS}{3}=` +
         ')' +
