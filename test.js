@@ -1,5 +1,5 @@
 var AJV = require('ajv')
-var assert = require('assert')
+var tape = require('tape')
 var schemas = require('./')
 var sodium = require('sodium-universal')
 
@@ -20,50 +20,54 @@ Object.keys(messages).forEach(function (key) {
 Object.keys(schemas)
   .filter(function (key) { return key !== 'messages' })
   .forEach(function (key) {
-    assert(
-      ajv.validateSchema(schemas[key]),
-      key + ' schema invalid'
-    )
+    tape(key + ' schema', function (test) {
+      test.assert(
+        ajv.validateSchema(schemas[key]),
+        key + ' schema invalid'
+      )
+      test.end()
+    })
   })
 
-// Validate an example invitation.
-var encryptionKey = makeStreamEncryptionKey()
+tape('invitation', function (test) {
+  var encryptionKey = makeStreamEncryptionKey()
 
-var replicationKey = makeStreamEncryptionKey()
-var replicationKeyNonce = randomNonce()
+  var replicationKey = makeStreamEncryptionKey()
+  var replicationKeyNonce = randomNonce()
 
-var readKey = makeBoxEncryptionKey()
-var readKeyNonce = randomNonce()
+  var readKey = makeBoxEncryptionKey()
+  var readKeyNonce = randomNonce()
 
-var writeSeed = makeSeed()
-var writeSeedNonce = randomNonce()
+  var writeSeed = makeSeed()
+  var writeSeedNonce = randomNonce()
 
-var title = 'test project'
-var titleNonce = randomNonce()
+  var title = 'test project'
+  var titleNonce = randomNonce()
 
-var invitation = {
-  replicationKeyCiphertext: encrypt(
-    replicationKey, replicationKeyNonce, encryptionKey
-  ).toString('hex'),
-  replicationKeyNonce: replicationKeyNonce.toString('hex'),
-  readKeyCiphertext: encrypt(
-    readKey, readKeyNonce, encryptionKey
-  ).toString('hex'),
-  readKeyNonce: readKeyNonce.toString('hex'),
-  writeSeedCiphertext: encrypt(
-    writeSeed, writeSeedNonce, encryptionKey
-  ).toString('hex'),
-  writeSeedNonce: writeSeedNonce.toString('hex'),
-  titleCiphertext: encrypt(
-    Buffer.from(title), titleNonce, encryptionKey
-  ).toString('hex'),
-  titleNonce: titleNonce.toString('hex')
-}
-
-assert(
-  ajv.validate(schemas.invitation, invitation),
-  'invalid invitation'
-)
+  var invitation = {
+    replicationKeyCiphertext: encrypt(
+      replicationKey, replicationKeyNonce, encryptionKey
+    ).toString('hex'),
+    replicationKeyNonce: replicationKeyNonce.toString('hex'),
+    readKeyCiphertext: encrypt(
+      readKey, readKeyNonce, encryptionKey
+    ).toString('hex'),
+    readKeyNonce: readKeyNonce.toString('hex'),
+    writeSeedCiphertext: encrypt(
+      writeSeed, writeSeedNonce, encryptionKey
+    ).toString('hex'),
+    writeSeedNonce: writeSeedNonce.toString('hex'),
+    titleCiphertext: encrypt(
+      Buffer.from(title), titleNonce, encryptionKey
+    ).toString('hex'),
+    titleNonce: titleNonce.toString('hex')
+  }
+  test.assert(
+    ajv.validate(schemas.invitation, invitation),
+    'invalid invitation'
+  )
+  test.end()
+})
 
 function makeSeed () {
   var seed = Buffer.alloc(sodium.crypto_sign_SEEDBYTES)
