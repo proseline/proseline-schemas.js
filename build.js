@@ -36,9 +36,25 @@ function hexString (bytes) {
 
 var project = hexString(GENERICHASH_BYTES)
 var digest = hexString(GENERICHASH_BYTES)
-var timestamp = { title: 'timestamp', type: 'string', format: 'date-time' }
-var name = { title: 'name', type: 'string', minLength: 1, maxLength: 256 }
-var noteText = { title: 'note text', type: 'string', minLength: 1 }
+
+var timestamp = {
+  title: 'timestamp',
+  type: 'string',
+  format: 'date-time'
+}
+
+var name = {
+  title: 'name',
+  type: 'string',
+  minLength: 1,
+  maxLength: 256
+}
+
+var noteText = {
+  title: 'note text',
+  type: 'string',
+  minLength: 1
+}
 
 // Log Entry Types
 
