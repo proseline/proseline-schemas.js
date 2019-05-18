@@ -164,7 +164,7 @@ var reference = strictObjectSchema({
 })
 
 module.exports = {
-  messages: messages,
+  // messages: messages,
   reference: reference,
   innerEnvelope: innerEnvelope,
   outerEnvelope: outerEnvelope
