@@ -35,7 +35,7 @@ var noteText = { type: 'string', minLength: 1 }
 
 // Drafts store the contents of a written draft.
 var draft = strictObjectSchema({
-  type: { var: 'draft' },
+  type: { const: 'draft' },
   // A draft can be based on up to two parents:
   // other drafts on which the new draft was based.
   parents: {
@@ -52,7 +52,7 @@ var draft = strictObjectSchema({
 // Marks record when a user moves a named marker onto a
 // specific draft.
 var mark = strictObjectSchema({
-  type: { var: 'mark' },
+  type: { const: 'mark' },
   // Each identifier has a unique identifier. User may
   // change the names of identifiers over time.
   identifier: hexString(4),
@@ -69,7 +69,7 @@ var mark = strictObjectSchema({
 // Notes store comments to drafts, as well as replies to
 // other notes.  This schema represents a note to a draft.
 var note = strictObjectSchema({
-  type: { var: 'note' },
+  type: { const: 'note' },
   // Notes reference drafts by their digests.
   draft: digest,
   // The cursor position of the range of the draft to which
@@ -83,7 +83,7 @@ var note = strictObjectSchema({
 })
 
 var reply = strictObjectSchema({
-  type: { var: 'note' },
+  type: { const: 'note' },
   draft: digest,
   // Unlike notes to draft, reply notes reference their
   // parent notes by digest, and do not specify ranges with
@@ -95,7 +95,7 @@ var reply = strictObjectSchema({
 
 // Corrections update the text of notes.
 var correction = strictObjectSchema({
-  type: { var: 'correction' },
+  type: { const: 'correction' },
   note: digest,
   text: noteText,
   timestamp: timestamp
@@ -104,7 +104,7 @@ var correction = strictObjectSchema({
 // Notes associates names and device, like "Kyle on laptop"
 // with logs.
 var intro = strictObjectSchema({
-  type: { var: 'intro' },
+  type: { const: 'intro' },
   name: name,
   device: name,
   timestamp: timestamp
