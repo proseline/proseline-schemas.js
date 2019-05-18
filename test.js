@@ -2,6 +2,7 @@ var AJV = require('ajv')
 var tape = require('tape')
 var schemas = require('./')
 var sodium = require('sodium-universal')
+var stringify = require('fast-json-stable-stringify')
 
 var ajv = new AJV()
 
@@ -69,16 +70,64 @@ tape('invitation', function (test) {
   test.end()
 })
 
+tape('intro in inner and outer envelopes', function (test) {
+  var intro = {
+    type: 'intro',
+    name: 'Kyle E. Mitchell',
+    device: 'laptop',
+    timestamp: new Date().toISOString()
+  }
+
+  var innerEnvelope = {
+    message: intro,
+    prior: hash(random(64)).toString('hex') // optional
+  }
+  var logKeyPair = makeKeyPair()
+  var writeKeyPair = makeKeyPair()
+  var clientKeyPair = makeKeyPair()
+  sign(innerEnvelope, logKeyPair, 'logSignature')
+  sign(innerEnvelope, clientKeyPair, 'clientSignature') // optional
+  sign(innerEnvelope, writeKeyPair, 'projectSignature')
+  ajv.validate(schemas.innerEnvelope, innerEnvelope)
+  test.deepEqual(ajv.errors, null, 'valid inner envelope')
+
+  var nonce = randomNonce()
+  var replicationKey = makeStreamEncryptionKey()
+  var discoveryKey = makeDiscoveryKey(replicationKey)
+  var readKey = makeBoxEncryptionKey()
+  var outerEnvelope = {
+    project: discoveryKey.toString('hex'),
+    publicKey: logKeyPair.publicKey.toString('hex'),
+    index: 1,
+    nonce: nonce.toString('hex'),
+    encryptedInnerEnvelope: encrypt(
+      Buffer.from(stringify(innerEnvelope)),
+      nonce,
+      readKey
+    ).toString('base64')
+  }
+  ajv.validate(schemas.outerEnvelope, outerEnvelope)
+  test.deepEqual(ajv.errors, null, 'valid outer envelope')
+
+  test.end()
+})
+
+// Helper Functions
+
 function makeSeed () {
   var seed = Buffer.alloc(sodium.crypto_sign_SEEDBYTES)
   sodium.randombytes_buf(seed)
   return seed
 }
 
+function random (bytes) {
+  var buffer = Buffer.alloc(bytes)
+  sodium.randombytes_buf(buffer)
+  return buffer
+}
+
 function randomNonce () {
-  var nonce = Buffer.alloc(sodium.crypto_secretbox_NONCEBYTES)
-  sodium.randombytes_buf(nonce)
-  return nonce
+  return random(sodium.crypto_secretbox_NONCEBYTES)
 }
 
 function makeStreamEncryptionKey () {
@@ -102,3 +151,36 @@ function encrypt (plaintext, nonce, key) {
   )
   return ciphertext
 }
+
+function makeKeyPair () {
+  var publicKey = Buffer.alloc(sodium.crypto_sign_PUBLICKEYBYTES)
+  var secretKey = Buffer.alloc(sodium.crypto_sign_SECRETKEYBYTES)
+  sodium.crypto_sign_keypair(publicKey, secretKey)
+  return { publicKey: publicKey, secretKey: secretKey }
+}
+
+function makeDiscoveryKey (encryptionKey) {
+  var discoveryKey = Buffer.alloc(sodium.crypto_generichash_BYTES)
+  sodium.crypto_generichash(discoveryKey, encryptionKey)
+  return discoveryKey
+}
+
+function sign (object, keyPair, key) {
+  var signature = Buffer.alloc(sodium.crypto_sign_BYTES)
+  sodium.crypto_sign_detached(
+    signature,
+    Buffer.from(stringify(object.message), 'utf8'),
+    keyPair.secretKey
+  )
+  object[key] = signature.toString('hex')
+}
+
+function hash (input) {
+  var digest = Buffer.alloc(sodium.crypto_generichash_BYTES)
+  sodium.crypto_generichash(
+    digest,
+    input
+  )
+  return digest
+}
+
