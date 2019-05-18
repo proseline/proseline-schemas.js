@@ -14,9 +14,7 @@ var STREAM_KEY_BYTES = sodium.crypto_stream_KEYBYTES
 var GENERICHASH_BYTES = sodium.crypto_generichash_BYTES
 
 var publicKey = hexString(SIGN_PUBLICKEYBYTES)
-
 var signature = hexString(SIGN_BYTES)
-
 var nonce = hexString(BOX_NONCE_BYTES)
 
 // Schemas represent byte strings as hex strings.
@@ -53,6 +51,7 @@ var draft = strictObjectSchema({
     type: 'array',
     // Drafts reference parents by their digests.
     items: digest,
+    // Drafts can have at most two parents.
     maxItems: 2,
     uniqueItems: true
   },
@@ -99,6 +98,7 @@ var note = strictObjectSchema({
 
 note.title = 'note'
 
+// Replies are notes to other notes.
 var reply = strictObjectSchema({
   type: { const: 'note' },
   draft: digest,
@@ -133,8 +133,8 @@ var intro = strictObjectSchema({
 
 intro.title = 'intro'
 
-var messages = { correction, draft, intro, mark, note, reply }
-
+// Inner Envelopes contain signatures, a link to the prior
+// log entry, and the message.
 var innerEnvelope = {
   type: 'object',
   properties: {
@@ -142,7 +142,9 @@ var innerEnvelope = {
     clientSignature: signature, // optional
     projectSignature: signature,
     prior: digest, // optional
-    message: { oneOf: Object.values(messages) }
+    message: {
+      oneOf: [ correction, draft, intro, mark, note, reply ]
+    }
   },
   required: [
     'logSignature',
@@ -154,6 +156,9 @@ var innerEnvelope = {
 
 innerEnvelope.title = 'inner envelope'
 
+// Outer Envelopes enclose encrypted Inner Envelopes,
+// exposing just enough data to allow replication-only
+// peers that know the replication key to replicate data.
 var outerEnvelope = strictObjectSchema({
   project: project,
   publicKey: publicKey,
@@ -180,8 +185,6 @@ var outerEnvelope = strictObjectSchema({
 
 outerEnvelope.title = 'outer envelope'
 
-// References
-
 // References point to particular log entries by log public
 // key and integer index. Peers exchange references to offer
 // and request log entries.
@@ -192,6 +195,9 @@ var reference = strictObjectSchema({
 
 reference.title = 'reference'
 
+// Invitations transmit replication keys, as well as
+// encrypted read and write keys, for use and storage
+// by account servers.
 var invitation = {
   type: 'object',
   properties: {
@@ -213,8 +219,9 @@ var invitation = {
   additionalProperties: false
 }
 
+invitation.title = 'invitation'
+
 module.exports = {
-  // messages: messages,
   invitation: invitation,
   reference: reference,
   innerEnvelope: innerEnvelope,
