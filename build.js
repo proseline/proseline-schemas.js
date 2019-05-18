@@ -1,15 +1,23 @@
 var sodium = require('sodium-universal')
 var strictObjectSchema = require('strict-json-object-schema')
 
-var NONCE_BYTES = sodium.crypto_secretbox_NONCEBYTES
+var BOX_NONCE_BYTES = sodium.crypto_secretbox_NONCEBYTES
+var BOX_MAC_BYTES = sodium.crypto_secretbox_MACBYTES
+var BOX_KEY_BYTES = sodium.crypto_secretbox_KEYBYTES
+
 var SIGN_BYTES = sodium.crypto_sign_BYTES
 var SIGN_PUBLICKEYBYTES = sodium.crypto_sign_PUBLICKEYBYTES
+var SIGN_SEED_BYTES = sodium.crypto_sign_SEEDBYTES
+
+var STREAM_KEY_BYTES = sodium.crypto_stream_KEYBYTES
+
+var GENERICHASH_BYTES = sodium.crypto_generichash_BYTES
 
 var publicKey = hexString(SIGN_PUBLICKEYBYTES)
 
 var signature = hexString(SIGN_BYTES)
 
-var nonce = hexString(NONCE_BYTES)
+var nonce = hexString(BOX_NONCE_BYTES)
 
 // Schemas represent byte strings as hex strings.
 function hexString (bytes) {
@@ -21,8 +29,6 @@ function hexString (bytes) {
   if (bytes) returned.length = bytes
   return returned
 }
-
-var GENERICHASH_BYTES = sodium.crypto_generichash_BYTES
 
 // JSON Schemas reused below:
 
@@ -185,11 +191,11 @@ reference.title = 'reference'
 var invitation = {
   type: 'object',
   properties: {
-    replicationKeyCiphertext: hexString(96),
+    replicationKeyCiphertext: hexString(STREAM_KEY_BYTES + BOX_MAC_BYTES),
     replicationKeyNonce: nonce,
-    readKeyCiphertext: hexString(96),
+    readKeyCiphertext: hexString(BOX_KEY_BYTES + BOX_MAC_BYTES),
     readKeyNonce: nonce,
-    writeSeedCiphertext: hexString(96), // optional
+    writeSeedCiphertext: hexString(SIGN_SEED_BYTES + BOX_MAC_BYTES), // optional
     writeSeedNonce: nonce, // optional
     titleCiphertext: hexString(), // optional
     titleNonce: nonce // optional
