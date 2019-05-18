@@ -12,6 +12,9 @@
     "ajv": "^6.10.0",
     "defence-cli": "^3.0.1",
     "fast-json-stable-stringify": "^2.0.0",
+    "husky": "^2.3.0",
+    "lint-staged": "^8.1.7",
+    "reformat-json-files": "^1.0.1",
     "replace-require-self": "^1.1.1",
     "sodium-universal": "^2.0.0",
     "sort-keys": "^3.0.0",
@@ -27,5 +30,20 @@
     "test:suite": "node test.js",
     "test:readme": "defence -i javascript README.md | replace-require-self | node",
     "lint": "standard && standard-markdown README.md"
+  },
+  "lint-staged": {
+    "*.js": [
+      "standard --fix",
+      "git add"
+    ],
+    "*.json": [
+      "reformat-json-files",
+      "git add"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
   }
 }
