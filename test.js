@@ -70,7 +70,7 @@ tape('intro in inner and outer envelopes', function (test) {
   }
 
   var innerEnvelope = {
-    message: intro,
+    entry: intro,
     prior: crypto.hash(
       crypto.randomBuffer(64)
     ).toString('hex') // optional

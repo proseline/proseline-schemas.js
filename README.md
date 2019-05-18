@@ -40,7 +40,7 @@ assert(typeof schemas.invitation === 'object')
 | | - (optional) signature with client keypair           | |
 | |                                                      | |
 | | +--------------------------------------------------+ | |
-| | | Message                                          | | |
+| | | Entry                                            | | |
 | | | + keys sorted                                    | | |
 | | | + JSON-encoded                                   | | |
 | | |                                                  | | |
@@ -60,7 +60,7 @@ Invitations, which include unencrypted replication keys,
 allow super peers to read and retransmit outer envelopes.
 
 Peers with project read keys can open inner envelopes and
-read the messages they contain.
+read the entries they contain.
 
 Peers with project write keys can generate log key pairs
-and sign messages containing entries.
+and sign messages.

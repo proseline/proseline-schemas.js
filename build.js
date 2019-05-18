@@ -138,7 +138,7 @@ var intro = strictObjectSchema({
 intro.title = 'intro'
 
 // Inner Envelopes contain signatures, a link to the prior
-// log entry, and the message.
+// log entry, and the entry.
 var innerEnvelope = {
   type: 'object',
   properties: {
@@ -146,14 +146,14 @@ var innerEnvelope = {
     clientSignature: signature, // optional
     projectSignature: signature,
     prior: digest, // optional
-    message: {
+    entry: {
       oneOf: [ correction, draft, intro, mark, note, reply ]
     }
   },
   required: [
     'logSignature',
     'projectSignature',
-    'message'
+    'entry'
   ],
   additionalProperties: false
 }
