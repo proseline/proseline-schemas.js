@@ -6,29 +6,16 @@ var stringify = require('fast-json-stable-stringify')
 
 var ajv = new AJV()
 
-// Validate message schemas.
-/*
-var messages = schemas.messages
-Object.keys(messages).forEach(function (key) {
-  assert(
-    ajv.validateSchema(messages[key]),
-    key + ' message schema invalid'
-  )
-})
-*/
-
 // Validate top-level schemas.
-Object.keys(schemas)
-  .filter(function (key) { return key !== 'messages' })
-  .forEach(function (key) {
-    tape(key + ' schema', function (test) {
-      test.assert(
-        ajv.validateSchema(schemas[key]),
-        key + ' schema invalid'
-      )
-      test.end()
-    })
+Object.keys(schemas).forEach(function (key) {
+  tape(key + ' schema', function (test) {
+    test.assert(
+      ajv.validateSchema(schemas[key]),
+      'valid schema'
+    )
+    test.end()
   })
+})
 
 tape('invitation', function (test) {
   var encryptionKey = makeStreamEncryptionKey()
@@ -50,19 +37,23 @@ tape('invitation', function (test) {
       replicationKey, replicationKeyNonce, encryptionKey
     ).toString('hex'),
     replicationKeyNonce: replicationKeyNonce.toString('hex'),
+
     readKeyCiphertext: encrypt(
       readKey, readKeyNonce, encryptionKey
     ).toString('hex'),
     readKeyNonce: readKeyNonce.toString('hex'),
+
     writeSeedCiphertext: encrypt(
       writeSeed, writeSeedNonce, encryptionKey
     ).toString('hex'),
     writeSeedNonce: writeSeedNonce.toString('hex'),
+
     titleCiphertext: encrypt(
       Buffer.from(title), titleNonce, encryptionKey
     ).toString('hex'),
     titleNonce: titleNonce.toString('hex')
   }
+
   test.assert(
     ajv.validate(schemas.invitation, invitation),
     'invalid invitation'
@@ -80,7 +71,7 @@ tape('intro in inner and outer envelopes', function (test) {
 
   var innerEnvelope = {
     message: intro,
-    prior: hash(random(64)).toString('hex') // optional
+    prior: hash(randomBuffer(64)).toString('hex') // optional
   }
   var logKeyPair = makeKeyPair()
   var writeKeyPair = makeKeyPair()
@@ -101,9 +92,7 @@ tape('intro in inner and outer envelopes', function (test) {
     index: 1,
     nonce: nonce.toString('hex'),
     encryptedInnerEnvelope: encrypt(
-      Buffer.from(stringify(innerEnvelope)),
-      nonce,
-      readKey
+      Buffer.from(stringify(innerEnvelope)), nonce, readKey
     ).toString('base64')
   }
   ajv.validate(schemas.outerEnvelope, outerEnvelope)
@@ -120,14 +109,14 @@ function makeSeed () {
   return seed
 }
 
-function random (bytes) {
+function randomBuffer (bytes) {
   var buffer = Buffer.alloc(bytes)
   sodium.randombytes_buf(buffer)
   return buffer
 }
 
 function randomNonce () {
-  return random(sodium.crypto_secretbox_NONCEBYTES)
+  return randomBuffer(sodium.crypto_secretbox_NONCEBYTES)
 }
 
 function makeStreamEncryptionKey () {
@@ -146,9 +135,7 @@ function encrypt (plaintext, nonce, key) {
   var ciphertext = Buffer.alloc(
     plaintext.length + sodium.crypto_secretbox_MACBYTES
   )
-  sodium.crypto_secretbox_easy(
-    ciphertext, plaintext, nonce, key
-  )
+  sodium.crypto_secretbox_easy(ciphertext, plaintext, nonce, key)
   return ciphertext
 }
 
@@ -177,10 +164,6 @@ function sign (object, keyPair, key) {
 
 function hash (input) {
   var digest = Buffer.alloc(sodium.crypto_generichash_BYTES)
-  sodium.crypto_generichash(
-    digest,
-    input
-  )
+  sodium.crypto_generichash(digest, input)
   return digest
 }
-
