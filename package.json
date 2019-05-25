@@ -1,6 +1,6 @@
 {
   "name": "@proseline/schemas",
-  "version": "1.0.0-pre.4",
+  "version": "1.0.0-pre.5",
   "description": "JSON schemas for Proseline data messages",
   "author": "Kyle E. Mitchell <kyle@kemitchell.com> (https://kemitchell.com/)",
   "repository": "proseline/proseline-schemas.js",
