@@ -78,9 +78,9 @@ tape('intro in inner and outer envelopes', function (test) {
   var logKeyPair = crypto.makeSigningKeyPair()
   var writeKeyPair = crypto.makeSigningKeyPair()
   var clientKeyPair = crypto.makeSigningKeyPair()
-  crypto.sign(innerEnvelope, logKeyPair, 'logSignature')
-  crypto.sign(innerEnvelope, clientKeyPair, 'clientSignature') // optional
-  crypto.sign(innerEnvelope, writeKeyPair, 'projectSignature')
+  crypto.sign(innerEnvelope, logKeyPair.secretKey, 'logSignature')
+  crypto.sign(innerEnvelope, clientKeyPair.secretKey, 'clientSignature') // optional
+  crypto.sign(innerEnvelope, writeKeyPair.secretKey, 'projectSignature')
   ajv.validate(schemas.innerEnvelope, innerEnvelope)
   test.deepEqual(ajv.errors, null, 'valid inner envelope')
 
