@@ -86,10 +86,10 @@ tape('intro in inner and outer envelopes', function (test) {
 
   var nonce = crypto.randomNonce()
   var replicationKey = crypto.makeProjectReplicationKey()
-  var discoveryKey = crypto.makeDiscoveryKey(replicationKey)
+  var projectDiscoveryKey = crypto.makeDiscoveryKey(replicationKey)
   var readKey = crypto.makeProjectReadKey()
   var outerEnvelope = {
-    discoveryKey: discoveryKey.toString('hex'),
+    projectDiscoveryKey: projectDiscoveryKey.toString('hex'),
     logPublicKey: logKeyPair.publicKey.toString('hex'),
     index: 1,
     nonce: nonce.toString('hex'),
