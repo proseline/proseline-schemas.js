@@ -22,7 +22,7 @@ function hexString (bytes) {
 
 // JSON Schemas reused below:
 
-var project = hexString(crypto.hashBytes)
+var discoveryKey = hexString(crypto.hashBytes)
 var digest = hexString(crypto.hashBytes)
 
 var timestamp = {
@@ -164,7 +164,7 @@ innerEnvelope.title = 'inner envelope'
 // exposing just enough data to allow replication-only
 // peers that know the replication key to replicate data.
 var outerEnvelope = strictObjectSchema({
-  project: project,
+  discoveryKey: discoveryKey,
   publicKey: publicKey,
   index: { type: 'integer', minimum: 0 },
   nonce: nonce,
