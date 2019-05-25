@@ -1,7 +1,7 @@
 var crypto = require('@proseline/crypto')
 var strictObjectSchema = require('strict-json-object-schema')
 
-var publicKey = hexString(crypto.signingPublicKeyBytes)
+var logPublicKey = hexString(crypto.signingPublicKeyBytes)
 var signature = hexString(crypto.signatureBytes)
 var nonce = hexString(crypto.nonceBytes)
 
@@ -165,7 +165,7 @@ innerEnvelope.title = 'inner envelope'
 // peers that know the replication key to replicate data.
 var outerEnvelope = strictObjectSchema({
   discoveryKey: discoveryKey,
-  publicKey: publicKey,
+  logPublicKey: logPublicKey,
   index: { type: 'integer', minimum: 0 },
   nonce: nonce,
   encryptedInnerEnvelope: {
@@ -193,7 +193,7 @@ outerEnvelope.title = 'outer envelope'
 // key and integer index. Peers exchange references to offer
 // and request log entries.
 var reference = strictObjectSchema({
-  publicKey: publicKey,
+  logPublicKey: logPublicKey,
   index: { type: 'integer', minimum: 0 }
 })
 
