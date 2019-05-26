@@ -3,22 +3,38 @@ var strictObjectSchema = require('strict-json-object-schema')
 
 // JSON Schemas reused below:
 
-var logPublicKey = hexString(crypto.signingPublicKeyBytes)
-var signature = hexString(crypto.signatureBytes)
-var nonce = hexString(crypto.nonceBytes)
-var discoveryKey = hexString(crypto.hashBytes)
-var digest = hexString(crypto.hashBytes)
+var logPublicKey = base64String(crypto.signingPublicKeyBytes)
+var signature = base64String(crypto.signatureBytes)
+var nonce = base64String(crypto.nonceBytes)
+var discoveryKey = base64String(crypto.hashBytes)
+var digest = base64String(crypto.hashBytes)
 
-function hexString (bytes) {
+var base64Pattern = (function makeBase64RegEx () {
+  var CHARS = '[A-Za-z0-9+/]'
+  return (
+    '^' +
+      '(' + CHARS + '{4})*' +
+      '(' +
+        CHARS + '{2}==' +
+        '|' +
+        CHARS + '{3}=' +
+      ')?' +
+    '$'
+  )
+})()
+
+function base64String (bytes) {
   var returned = {
-    title: 'hexadecimal string',
+    title: 'base64 string',
     type: 'string',
-    pattern: '^[a-f0-9]+$'
+    pattern: base64Pattern
   }
   if (bytes) {
-    var characters = bytes * 2
+    var characters = Buffer.alloc(bytes).toString('base64').length
     returned.minLength = characters
     returned.maxLength = characters
+  } else {
+    returned.minLength = 4
   }
   return returned
 }
@@ -69,7 +85,7 @@ var mark = strictObjectSchema({
   type: { const: 'mark' },
   // Each identifier has a unique identifier. User may
   // change the names of identifiers over time.
-  identifier: hexString(4),
+  identifier: base64String(4),
   name: {
     type: 'string',
     minLength: 1,
@@ -153,23 +169,9 @@ var envelope = strictObjectSchema({
   logSignature: signature,
   projectSignature: signature,
   index: index,
-  nonce: nonce,
-  encryptedEntry: {
-    type: 'string',
-    minLength: 4,
-    pattern: (function makeBase64RegEx () {
-      var CHARS = '[A-Za-z0-9+/]'
-      return (
-        '^' +
-          '(' + CHARS + '{4})*' +
-          '(' +
-            CHARS + '{2}==' +
-            '|' +
-            CHARS + '{3}=' +
-          ')?' +
-        '$'
-      )
-    })()
+  entry: {
+    nonce: nonce,
+    ciphertext: base64String()
   }
 })
 
@@ -192,11 +194,11 @@ var invitation = {
   title: 'invitation',
   type: 'object',
   properties: {
-    replicationKey: hexString(crypto.projectReplicationKeyBytes),
-    publicKey: hexString(crypto.signingPublicKeyBytes),
+    replicationKey: base64String(crypto.projectReplicationKeyBytes),
+    publicKey: base64String(crypto.signingPublicKeyBytes),
     // optional
     secretKey: strictObjectSchema({
-      ciphertext: hexString(
+      ciphertext: base64String(
         crypto.signingSecretKeyBytes +
         crypto.encryptionMACBytes
       ),
@@ -204,7 +206,7 @@ var invitation = {
     }),
     // optional:
     encryptionKey: strictObjectSchema({
-      ciphertext: hexString(
+      ciphertext: base64String(
         crypto.projectReadKeyBytes +
         crypto.encryptionMACBytes
       ),
@@ -212,7 +214,7 @@ var invitation = {
     }),
     // optional:
     title: strictObjectSchema({
-      ciphertext: hexString(),
+      ciphertext: base64String(),
       nonce
     })
   },
