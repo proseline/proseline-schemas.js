@@ -8,59 +8,68 @@ JSON schemas for Proseline data messages
 var schemas = require('@proseline/schemas')
 var assert = require('assert')
 
-assert(typeof schemas.reference === 'object')
-assert(typeof schemas.innerEnvelope === 'object')
-assert(typeof schemas.outerEnvelope === 'object')
+assert(typeof schemas.entry === 'object')
+assert(typeof schemas.envelope === 'object')
 assert(typeof schemas.invitation === 'object')
+assert(typeof schemas.reference === 'object')
 ```
 
 ## Overview
 
+### Envelope
+
 ```
 +----------------------------------------------------------+
-| Outer Envelope                                           |
+| Envelope                                                 |
 | + JSON-encoded                                           |
 | + sent via channel encrypted with replication key        |
 |                                                          |
 | - project discovery key                                  |
 | - log public key                                         |
+| - signature with log secret key                          |
+| - signature with project shared key                      |
 | - log entry index (>= 0)                                 |
 | - random inner envelope encryption nonce                 |
 |                                                          |
 | +------------------------------------------------------+ |
-| | Inner Envelope                                       | |
+| | Entry                                                | |
 | | + keys sorted                                        | |
 | | + JSON-encoded                                       | |
-| | + encrypted with project shared key                  | |
+| | + encrypted with project public key                  | |
 | | + Base64-encoded                                     | |
 | |                                                      | |
-| | - signature with log keypair                         | |
-| | - signature with project write keypair               | |
+| | - log entrty index (>= 0)                            | |
 | | - digest of prior log entry (log entry index > 0)    | |
-| | - (optional) signature with client keypair           | |
 | |                                                      | |
-| | +--------------------------------------------------+ | |
-| | | Entry                                            | | |
-| | | + keys sorted                                    | | |
-| | | + JSON-encoded                                   | | |
-| | |                                                  | | |
-| | | One Of:                                          | | |
-| | | - draft                                          | | |
-| | | - mark                                           | | |
-| | | - log author introduction                        | | |
-| | | - note to a draft                                | | |
-| | | - reply to a note                                | | |
-| | | - correction to a note or reply                  | | |
-| | +--------------------------------------------------+ | |
+| | One Of:                                              | |
+| | - draft                                              | |
+| | - mark                                               | |
+| | - log author introduction                            | |
+| | - note to a draft                                    | |
+| | - reply to a note                                    | |
+| | - correction to a note or reply                      | |
+| |                                                      | |
 | +------------------------------------------------------+ |
 +----------------------------------------------------------+
 ```
 
-Invitations, which include unencrypted replication keys,
-allow super peers to read and retransmit outer envelopes.
+## Invitation
 
-Peers with project read keys can open inner envelopes and
-read the entries they contain.
-
-Peers with project write keys can generate log key pairs
-and sign messages.
+```
++----------------------------------------------------------+
+| Invitation                                               |
+|                                                          |
+| Required:                                                |
+| - project replication key                                |
+| - project public key                                     |
+|                                                          |
+| Optional:                                                |
+| - encrypted project secret key (optional)                |
+| - project secret key encryption nonce                    |
+| - encrypted project read key                             |
+| - project read key encryption nonce                      |
+| - encrypted project title                                |
+| - project title encryption nonce                         |
+|                                                          |
++----------------------------------------------------------+
+```

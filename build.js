@@ -1,11 +1,14 @@
 var crypto = require('@proseline/crypto')
 var strictObjectSchema = require('strict-json-object-schema')
 
+// JSON Schemas reused below:
+
 var logPublicKey = hexString(crypto.signingPublicKeyBytes)
 var signature = hexString(crypto.signatureBytes)
 var nonce = hexString(crypto.nonceBytes)
+var discoveryKey = hexString(crypto.hashBytes)
+var digest = hexString(crypto.hashBytes)
 
-// Schemas represent byte strings as hex strings.
 function hexString (bytes) {
   var returned = {
     title: 'hexadecimal string',
@@ -20,10 +23,7 @@ function hexString (bytes) {
   return returned
 }
 
-// JSON Schemas reused below:
-
-var projectDiscoveryKey = hexString(crypto.hashBytes)
-var digest = hexString(crypto.hashBytes)
+var index = { type: 'integer', minimum: 0 }
 
 var timestamp = {
   title: 'timestamp',
@@ -63,8 +63,6 @@ var draft = strictObjectSchema({
   timestamp: timestamp
 })
 
-draft.title = 'draft'
-
 // Marks record when a user moves a named marker onto a
 // specific draft.
 var mark = strictObjectSchema({
@@ -82,8 +80,6 @@ var mark = strictObjectSchema({
   draft: digest
 })
 
-mark.title = 'mark'
-
 // Notes store comments to drafts, as well as replies to
 // other notes.  This schema represents a note to a draft.
 var note = strictObjectSchema({
@@ -100,8 +96,6 @@ var note = strictObjectSchema({
   timestamp: timestamp
 })
 
-note.title = 'note'
-
 // Replies are notes to other notes.
 var reply = strictObjectSchema({
   type: { const: 'note' },
@@ -114,8 +108,6 @@ var reply = strictObjectSchema({
   timestamp: timestamp
 })
 
-reply.title = 'reply'
-
 // Corrections update the text of notes.
 var correction = strictObjectSchema({
   type: { const: 'correction' },
@@ -123,8 +115,6 @@ var correction = strictObjectSchema({
   text: noteText,
   timestamp: timestamp
 })
-
-correction.title = 'correction'
 
 // Notes associates names and device, like "Kyle on laptop"
 // with logs.
@@ -135,40 +125,36 @@ var intro = strictObjectSchema({
   timestamp: timestamp
 })
 
-intro.title = 'intro'
+var entryTypes = { correction, draft, intro, mark, note, reply }
 
-// Inner Envelopes contain signatures, a link to the prior
-// log entry, and the entry.
-var innerEnvelope = {
-  type: 'object',
-  properties: {
-    logSignature: signature,
-    clientSignature: signature, // optional
-    projectSignature: signature,
-    prior: digest, // optional
-    entry: {
-      oneOf: [ correction, draft, intro, mark, note, reply ]
-    }
-  },
-  required: [
-    'logSignature',
-    'projectSignature',
-    'entry'
-  ],
-  additionalProperties: false
+Object.keys(entryTypes).forEach(function (name) {
+  var schema = entryTypes[name]
+  schema.title = name
+  schema.properties.prior = digest
+  schema.properties.index = index
+  schema.required.push('index')
+  schema.required.sort()
+})
+
+var entry = {
+  title: 'entry',
+  oneOf: Object.keys(entryTypes).map(function (name) {
+    return { '$ref': '#/definitions/' + name }
+  }).sort(),
+  definitions: entryTypes
 }
 
-innerEnvelope.title = 'inner envelope'
-
-// Outer Envelopes enclose encrypted Inner Envelopes,
-// exposing just enough data to allow replication-only
-// peers that know the replication key to replicate data.
-var outerEnvelope = strictObjectSchema({
-  projectDiscoveryKey: projectDiscoveryKey,
+// Envelopes enclose encrypted entries, exposing just enough
+// data to allow replication-only peers that know the
+// replication key to replicate data.
+var envelope = strictObjectSchema({
+  discoveryKey: discoveryKey,
   logPublicKey: logPublicKey,
-  index: { type: 'integer', minimum: 0 },
+  logSignature: signature,
+  projectSignature: signature,
+  index: index,
   nonce: nonce,
-  encryptedInnerEnvelope: {
+  encryptedEntry: {
     type: 'string',
     minLength: 4,
     pattern: (function makeBase64RegEx () {
@@ -187,13 +173,13 @@ var outerEnvelope = strictObjectSchema({
   }
 })
 
-outerEnvelope.title = 'outer envelope'
+envelope.title = 'envelope'
 
 // References point to particular log entries by log public
 // key and integer index. Peers exchange references to offer
 // and request log entries.
 var reference = strictObjectSchema({
-  logPublicKey: logPublicKey,
+  logPublicKey,
   index: { type: 'integer', minimum: 0 }
 })
 
@@ -203,35 +189,36 @@ reference.title = 'reference'
 // encrypted read and write keys, for use and storage
 // by account servers.
 var invitation = {
+  title: 'invitation',
   type: 'object',
   properties: {
     replicationKey: hexString(crypto.projectReplicationKeyBytes),
+    projectPublicKey: hexString(crypto.signingPublicKeyBytes),
+    projectSecretKeyCiphertext: hexString(
+      crypto.signingSecretKeyBytes +
+      crypto.encryptionMACBytes
+    ), // optional
+    projectSecretKeyNonce: nonce, // optional
     readKeyCiphertext: hexString(
       crypto.projectReadKeyBytes +
       crypto.encryptionMACBytes
     ),
     readKeyNonce: nonce,
-    writeSeedCiphertext: hexString(
-      crypto.signingKeyPairSeedBytes +
-      crypto.encryptionMACBytes
-    ), // optional
-    writeSeedNonce: nonce, // optional
     titleCiphertext: hexString(), // optional
     titleNonce: nonce // optional
   },
   required: [
     'replicationKey',
+    'projectPublicKey',
     'readKeyCiphertext',
     'readKeyNonce'
   ],
   additionalProperties: false
 }
 
-invitation.title = 'invitation'
-
 module.exports = {
-  invitation: invitation,
-  reference: reference,
-  innerEnvelope: innerEnvelope,
-  outerEnvelope: outerEnvelope
+  invitation,
+  reference,
+  envelope,
+  entry
 }
