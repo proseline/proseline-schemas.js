@@ -63,9 +63,12 @@ tape('invitation', function (test) {
 })
 
 tape('intro in envelope', function (test) {
+  var replicationKey = crypto.replicationKey()
+  var discoveryKey = crypto.discoveryKey(replicationKey)
   var index = 1
   var prior = crypto.hash(crypto.random(64))
   var entry = {
+    discoveryKey,
     index,
     prior,
     type: 'intro',
@@ -76,10 +79,8 @@ tape('intro in envelope', function (test) {
   ajv.validate(schemas.entry, entry)
   test.deepEqual(ajv.errors, null, 'valid entry')
 
-  var replicationKey = crypto.replicationKey()
   var logKeyPair = crypto.keyPair()
   var projectKeyPair = crypto.keyPair()
-  var discoveryKey = crypto.discoveryKey(replicationKey)
   var readKey = crypto.encryptionKey()
   var logPublicKey = logKeyPair.publicKey
   var nonce = crypto.nonce()

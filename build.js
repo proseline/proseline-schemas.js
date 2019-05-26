@@ -153,7 +153,8 @@ Object.keys(entryTypes).forEach(function (name) {
   schema.title = name
   schema.properties.prior = digest
   schema.properties.index = index
-  schema.required.push('index')
+  schema.properties.discoveryKey = discoveryKey
+  schema.required.push('index', 'discoveryKey')
   schema.required.sort()
 })
 
