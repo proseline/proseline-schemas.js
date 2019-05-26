@@ -21,7 +21,6 @@ tape('invitation', function (test) {
   var encryptionKey = crypto.randomBuffer(crypto.projectReadKeyBytes)
 
   var replicationKey = crypto.makeProjectReplicationKey()
-  var replicationKeyNonce = crypto.randomNonce()
 
   var readKey = crypto.makeProjectReadKey()
   var readKeyNonce = crypto.randomNonce()
@@ -33,10 +32,7 @@ tape('invitation', function (test) {
   var titleNonce = crypto.randomNonce()
 
   var invitation = {
-    replicationKeyCiphertext: crypto.encrypt(
-      replicationKey, replicationKeyNonce, encryptionKey
-    ).toString('hex'),
-    replicationKeyNonce: replicationKeyNonce.toString('hex'),
+    replicationKey: replicationKey,
 
     readKeyCiphertext: crypto.encrypt(
       readKey, readKeyNonce, encryptionKey

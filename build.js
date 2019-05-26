@@ -205,11 +205,7 @@ reference.title = 'reference'
 var invitation = {
   type: 'object',
   properties: {
-    replicationKeyCiphertext: hexString(
-      crypto.projectReplicationKeyBytes +
-      crypto.encryptionMACBytes
-    ),
-    replicationKeyNonce: nonce,
+    replicationKey: hexString(crypto.projectReplicationKeyBytes),
     readKeyCiphertext: hexString(
       crypto.projectReadKeyBytes +
       crypto.encryptionMACBytes
@@ -224,8 +220,7 @@ var invitation = {
     titleNonce: nonce // optional
   },
   required: [
-    'replicationKeyCiphertext',
-    'replicationKeyNonce',
+    'replicationKey',
     'readKeyCiphertext',
     'readKeyNonce'
   ],
