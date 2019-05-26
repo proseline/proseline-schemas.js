@@ -18,14 +18,14 @@ Object.keys(schemas).forEach(function (key) {
 })
 
 tape('invitation', function (test) {
-  var encryptionKey = crypto.randomBuffer(crypto.projectReadKeyBytes)
+  var encryptionKey = crypto.random(crypto.projectReadKeyBytes)
 
-  var replicationKey = crypto.makeProjectReplicationKey()
+  var replicationKey = crypto.projectReplicationKey()
 
-  var readKey = crypto.makeProjectReadKey()
+  var readKey = crypto.projectReadKey()
   var readKeyNonce = crypto.randomNonce()
 
-  var writeSeed = crypto.makeSigningKeyPairSeed()
+  var writeSeed = crypto.signingKeyPairSeed()
   var writeSeedNonce = crypto.randomNonce()
 
   var title = 'test project'
@@ -34,26 +34,24 @@ tape('invitation', function (test) {
   var invitation = {
     replicationKey: replicationKey,
 
-    readKeyCiphertext: crypto.encrypt(
+    readKeyCiphertext: crypto.encryptHex(
       readKey, readKeyNonce, encryptionKey
-    ).toString('hex'),
-    readKeyNonce: readKeyNonce.toString('hex'),
+    ),
+    readKeyNonce: readKeyNonce,
 
-    writeSeedCiphertext: crypto.encrypt(
+    writeSeedCiphertext: crypto.encryptHex(
       writeSeed, writeSeedNonce, encryptionKey
-    ).toString('hex'),
-    writeSeedNonce: writeSeedNonce.toString('hex'),
+    ),
+    writeSeedNonce: writeSeedNonce,
 
-    titleCiphertext: crypto.encrypt(
-      Buffer.from(title), titleNonce, encryptionKey
-    ).toString('hex'),
-    titleNonce: titleNonce.toString('hex')
+    titleCiphertext: crypto.encryptHex(
+      title, titleNonce, encryptionKey
+    ),
+    titleNonce: titleNonce
   }
 
-  test.assert(
-    ajv.validate(schemas.invitation, invitation),
-    'invalid invitation'
-  )
+  ajv.validate(schemas.invitation, invitation)
+  test.deepEqual(ajv.errors, null, 'invalid invitation')
   test.end()
 })
 
@@ -68,12 +66,12 @@ tape('intro in inner and outer envelopes', function (test) {
   var innerEnvelope = {
     entry: intro,
     prior: crypto.hash(
-      crypto.randomBuffer(64)
-    ).toString('hex') // optional
+      crypto.random(64)
+    )
   }
-  var logKeyPair = crypto.makeSigningKeyPair()
-  var writeKeyPair = crypto.makeSigningKeyPair()
-  var clientKeyPair = crypto.makeSigningKeyPair()
+  var logKeyPair = crypto.signingKeyPair()
+  var writeKeyPair = crypto.signingKeyPair()
+  var clientKeyPair = crypto.signingKeyPair()
   crypto.sign(innerEnvelope, logKeyPair.secretKey, 'logSignature')
   crypto.sign(innerEnvelope, clientKeyPair.secretKey, 'clientSignature') // optional
   crypto.sign(innerEnvelope, writeKeyPair.secretKey, 'projectSignature')
@@ -81,17 +79,17 @@ tape('intro in inner and outer envelopes', function (test) {
   test.deepEqual(ajv.errors, null, 'valid inner envelope')
 
   var nonce = crypto.randomNonce()
-  var replicationKey = crypto.makeProjectReplicationKey()
-  var projectDiscoveryKey = crypto.makeDiscoveryKey(replicationKey)
-  var readKey = crypto.makeProjectReadKey()
+  var replicationKey = crypto.projectReplicationKey()
+  var projectDiscoveryKey = crypto.discoveryKey(replicationKey)
+  var readKey = crypto.projectReadKey()
   var outerEnvelope = {
-    projectDiscoveryKey: projectDiscoveryKey.toString('hex'),
-    logPublicKey: logKeyPair.publicKey.toString('hex'),
+    projectDiscoveryKey: projectDiscoveryKey,
+    logPublicKey: logKeyPair.publicKey,
     index: 1,
-    nonce: nonce.toString('hex'),
-    encryptedInnerEnvelope: crypto.encrypt(
-      Buffer.from(stringify(innerEnvelope)), nonce, readKey
-    ).toString('base64')
+    nonce: nonce,
+    encryptedInnerEnvelope: crypto.encryptUTF8(
+      stringify(innerEnvelope), nonce, readKey
+    )
   }
   ajv.validate(schemas.outerEnvelope, outerEnvelope)
   test.deepEqual(ajv.errors, null, 'valid outer envelope')
