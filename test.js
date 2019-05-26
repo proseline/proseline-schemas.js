@@ -17,14 +17,14 @@ Object.keys(schemas).forEach(function (key) {
 })
 
 tape('invitation', function (test) {
-  var invitationEncryptionKey = crypto.random(crypto.projectReadKeyBytes)
+  var invitationEncryptionKey = crypto.random(crypto.encryptionKeyBytes)
 
-  var replicationKey = crypto.projectReplicationKey()
+  var replicationKey = crypto.replicationKey()
 
-  var projectEncryptionKey = crypto.projectReadKey()
+  var projectEncryptionKey = crypto.encryptionKey()
   var projectEncryptionKeyNonce = crypto.nonce()
 
-  var keyPair = crypto.signingKeyPair()
+  var keyPair = crypto.keyPair()
   var publicKey = keyPair.publicKey
   var secretKey = keyPair.secretKey
   var secretKeyNonce = crypto.nonce()
@@ -76,11 +76,11 @@ tape('intro in envelope', function (test) {
   ajv.validate(schemas.entry, entry)
   test.deepEqual(ajv.errors, null, 'valid entry')
 
-  var replicationKey = crypto.projectReplicationKey()
-  var logKeyPair = crypto.signingKeyPair()
-  var projectKeyPair = crypto.signingKeyPair()
+  var replicationKey = crypto.replicationKey()
+  var logKeyPair = crypto.keyPair()
+  var projectKeyPair = crypto.keyPair()
   var discoveryKey = crypto.discoveryKey(replicationKey)
-  var readKey = crypto.projectReadKey()
+  var readKey = crypto.encryptionKey()
   var logPublicKey = logKeyPair.publicKey
   var nonce = crypto.nonce()
   var envelope = {

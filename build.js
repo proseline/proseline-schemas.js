@@ -1,13 +1,14 @@
+var assert = require('assert')
 var crypto = require('@proseline/crypto')
 var strictObjectSchema = require('strict-json-object-schema')
 
 // JSON Schemas reused below:
 
-var logPublicKey = base64String(crypto.signingPublicKeyBytes)
+var logPublicKey = base64String(crypto.publicKeyBytes)
 var signature = base64String(crypto.signatureBytes)
 var nonce = base64String(crypto.nonceBytes)
-var discoveryKey = base64String(crypto.hashBytes)
-var digest = base64String(crypto.hashBytes)
+var discoveryKey = base64String(crypto.digestBytes)
+var digest = base64String(crypto.digestBytes)
 
 var base64Pattern = (function makeBase64RegEx () {
   var CHARS = '[A-Za-z0-9+/]'
@@ -24,6 +25,10 @@ var base64Pattern = (function makeBase64RegEx () {
 })()
 
 function base64String (bytes) {
+  if (bytes) {
+    assert(Number.isSafeInteger(bytes))
+    assert(bytes > 0)
+  }
   var returned = {
     title: 'base64 string',
     type: 'string',
@@ -170,7 +175,7 @@ var envelope = strictObjectSchema({
   projectSignature: signature,
   index: index,
   entry: {
-    nonce: nonce,
+    nonce,
     ciphertext: base64String()
   }
 })
@@ -194,12 +199,12 @@ var invitation = {
   title: 'invitation',
   type: 'object',
   properties: {
-    replicationKey: base64String(crypto.projectReplicationKeyBytes),
-    publicKey: base64String(crypto.signingPublicKeyBytes),
+    replicationKey: base64String(crypto.replicationKeyBytes),
+    publicKey: base64String(crypto.publicKeyBytes),
     // optional
     secretKey: strictObjectSchema({
       ciphertext: base64String(
-        crypto.signingSecretKeyBytes +
+        crypto.secretKeyBytes +
         crypto.encryptionMACBytes
       ),
       nonce
@@ -207,7 +212,7 @@ var invitation = {
     // optional:
     encryptionKey: strictObjectSchema({
       ciphertext: base64String(
-        crypto.projectReadKeyBytes +
+        crypto.encryptionKeyBytes +
         crypto.encryptionMACBytes
       ),
       nonce
