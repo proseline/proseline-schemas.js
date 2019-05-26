@@ -193,25 +193,32 @@ var invitation = {
   type: 'object',
   properties: {
     replicationKey: hexString(crypto.projectReplicationKeyBytes),
-    projectPublicKey: hexString(crypto.signingPublicKeyBytes),
-    projectSecretKeyCiphertext: hexString(
-      crypto.signingSecretKeyBytes +
-      crypto.encryptionMACBytes
-    ), // optional
-    projectSecretKeyNonce: nonce, // optional
-    readKeyCiphertext: hexString(
-      crypto.projectReadKeyBytes +
-      crypto.encryptionMACBytes
-    ),
-    readKeyNonce: nonce,
-    titleCiphertext: hexString(), // optional
-    titleNonce: nonce // optional
+    publicKey: hexString(crypto.signingPublicKeyBytes),
+    // optional
+    secretKey: strictObjectSchema({
+      ciphertext: hexString(
+        crypto.signingSecretKeyBytes +
+        crypto.encryptionMACBytes
+      ),
+      nonce
+    }),
+    // optional:
+    encryptionKey: strictObjectSchema({
+      ciphertext: hexString(
+        crypto.projectReadKeyBytes +
+        crypto.encryptionMACBytes
+      ),
+      nonce
+    }),
+    // optional:
+    title: strictObjectSchema({
+      ciphertext: hexString(),
+      nonce
+    })
   },
   required: [
     'replicationKey',
-    'projectPublicKey',
-    'readKeyCiphertext',
-    'readKeyNonce'
+    'publicKey'
   ],
   additionalProperties: false
 }

@@ -18,39 +18,44 @@ Object.keys(schemas).forEach(function (key) {
 })
 
 tape('invitation', function (test) {
-  var encryptionKey = crypto.random(crypto.projectReadKeyBytes)
+  var invitationEncryptionKey = crypto.random(crypto.projectReadKeyBytes)
 
   var replicationKey = crypto.projectReplicationKey()
 
-  var readKey = crypto.projectReadKey()
-  var readKeyNonce = crypto.randomNonce()
+  var projectEncryptionKey = crypto.projectReadKey()
+  var projectEncryptionKeyNonce = crypto.randomNonce()
 
-  var projectKeyPair = crypto.signingKeyPair()
-  var projectPublicKey = projectKeyPair.publicKey
-  var projectSecretKey = projectKeyPair.secretKey
-  var projectSecretKeyNonce = crypto.randomNonce()
+  var keyPair = crypto.signingKeyPair()
+  var publicKey = keyPair.publicKey
+  var secretKey = keyPair.secretKey
+  var secretKeyNonce = crypto.randomNonce()
 
   var title = 'test project'
   var titleNonce = crypto.randomNonce()
 
   var invitation = {
     replicationKey,
-    projectPublicKey,
-
-    readKeyCiphertext: crypto.encryptHex(
-      readKey, readKeyNonce, encryptionKey
-    ),
-    readKeyNonce,
-
-    projectSecretKeyCiphertext: crypto.encryptHex(
-      projectSecretKey, projectSecretKeyNonce, encryptionKey
-    ),
-    projectSecretKeyNonce,
-
-    titleCiphertext: crypto.encryptHex(
-      title, titleNonce, encryptionKey
-    ),
-    titleNonce
+    publicKey,
+    encryptionKey: {
+      ciphertext: crypto.encryptHex(
+        projectEncryptionKey,
+        projectEncryptionKeyNonce,
+        invitationEncryptionKey
+      ),
+      nonce: projectEncryptionKeyNonce
+    },
+    secretKey: {
+      ciphertext: crypto.encryptHex(
+        secretKey, secretKeyNonce, invitationEncryptionKey
+      ),
+      nonce: secretKeyNonce
+    },
+    title: {
+      ciphertext: crypto.encryptHex(
+        title, titleNonce, invitationEncryptionKey
+      ),
+      nonce: titleNonce
+    }
   }
 
   ajv.validate(schemas.invitation, invitation)
