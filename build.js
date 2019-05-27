@@ -169,19 +169,31 @@ var entry = {
 // Envelopes enclose encrypted entries, exposing just enough
 // data to allow replication-only peers that know the
 // replication key to replicate data.
-var envelope = strictObjectSchema({
-  discoveryKey: discoveryKey,
-  logPublicKey: logPublicKey,
-  logSignature: signature,
-  projectSignature: signature,
-  index: index,
-  entry: {
-    nonce,
-    ciphertext: base64String()
-  }
-})
-
-envelope.title = 'envelope'
+var envelope = {
+  title: 'envelope',
+  type: 'object',
+  properties: {
+    discoveryKey: discoveryKey,
+    logPublicKey: logPublicKey,
+    logSignature: signature,
+    projectSignature: signature,
+    index: index,
+    prior: digest,
+    entry: {
+      nonce,
+      ciphertext: base64String()
+    }
+  },
+  required: [
+    'discoveryKey',
+    'logPublicKey',
+    'logSignature',
+    'projectSignature',
+    'index',
+    'entry'
+  ],
+  additionalProperties: false
+}
 
 // References point to particular log entries by log public
 // key and integer index. Peers exchange references to offer

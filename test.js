@@ -88,6 +88,7 @@ tape('intro in envelope', function (test) {
     discoveryKey,
     logPublicKey,
     index,
+    prior,
     logSignature: crypto.signJSON(entry, logKeyPair.secretKey),
     projectSignature: crypto.signJSON(entry, projectKeyPair.secretKey),
     entry: {
