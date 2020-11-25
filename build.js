@@ -1,17 +1,17 @@
-var assert = require('assert')
-var crypto = require('@proseline/crypto')
-var strictObjectSchema = require('strict-json-object-schema')
+const assert = require('assert')
+const crypto = require('@proseline/crypto')
+const strictObjectSchema = require('strict-json-object-schema')
 
 // JSON Schemas reused below:
 
-var logPublicKey = base64String(crypto.publicKeyBytes)
-var signature = base64String(crypto.signatureBytes)
-var nonce = base64String(crypto.nonceBytes)
-var discoveryKey = base64String(crypto.digestBytes)
-var digest = base64String(crypto.digestBytes)
+const logPublicKey = base64String(crypto.publicKeyBytes)
+const signature = base64String(crypto.signatureBytes)
+const nonce = base64String(crypto.nonceBytes)
+const discoveryKey = base64String(crypto.digestBytes)
+const digest = base64String(crypto.digestBytes)
 
-var base64Pattern = (function makeBase64RegEx () {
-  var CHARS = '[A-Za-z0-9+/]'
+const base64Pattern = (function makeBase64RegEx () {
+  const CHARS = '[A-Za-z0-9+/]'
   return (
     '^' +
       '(' + CHARS + '{4})*' +
@@ -29,13 +29,13 @@ function base64String (bytes) {
     assert(Number.isSafeInteger(bytes))
     assert(bytes > 0)
   }
-  var returned = {
+  const returned = {
     title: 'base64 string',
     type: 'string',
     pattern: base64Pattern
   }
   if (bytes) {
-    var characters = Buffer.alloc(bytes).toString('base64').length
+    const characters = Buffer.alloc(bytes).toString('base64').length
     returned.minLength = characters
     returned.maxLength = characters
   } else {
@@ -44,22 +44,22 @@ function base64String (bytes) {
   return returned
 }
 
-var index = { type: 'integer', minimum: 0 }
+const index = { type: 'integer', minimum: 0 }
 
-var timestamp = {
+const timestamp = {
   title: 'timestamp',
   type: 'string',
   format: 'date-time'
 }
 
-var name = {
+const name = {
   title: 'name',
   type: 'string',
   minLength: 1,
   maxLength: 256
 }
 
-var noteText = {
+const noteText = {
   title: 'note text',
   type: 'string',
   minLength: 1
@@ -68,7 +68,7 @@ var noteText = {
 // Log Entry Types
 
 // Drafts store the contents of a written draft.
-var draft = strictObjectSchema({
+const draft = strictObjectSchema({
   type: { const: 'draft' },
   // A draft can be based on up to two parents:
   // other drafts on which the new draft was based.
@@ -86,7 +86,7 @@ var draft = strictObjectSchema({
 
 // Marks record when a user moves a named marker onto a
 // specific draft.
-var mark = strictObjectSchema({
+const mark = strictObjectSchema({
   type: { const: 'mark' },
   // Each identifier has a unique identifier. User may
   // change the names of identifiers over time.
@@ -103,7 +103,7 @@ var mark = strictObjectSchema({
 
 // Notes store comments to drafts, as well as replies to
 // other notes.  This schema represents a note to a draft.
-var note = strictObjectSchema({
+const note = strictObjectSchema({
   type: { const: 'note' },
   // Notes reference drafts by their digests.
   draft: digest,
@@ -118,7 +118,7 @@ var note = strictObjectSchema({
 })
 
 // Replies are notes to other notes.
-var reply = strictObjectSchema({
+const reply = strictObjectSchema({
   type: { const: 'note' },
   draft: digest,
   // Unlike notes to draft, reply notes reference their
@@ -130,7 +130,7 @@ var reply = strictObjectSchema({
 })
 
 // Corrections update the text of notes.
-var correction = strictObjectSchema({
+const correction = strictObjectSchema({
   type: { const: 'correction' },
   note: digest,
   text: noteText,
@@ -139,7 +139,7 @@ var correction = strictObjectSchema({
 
 // Notes associates names and device, like "Kyle on laptop"
 // with logs.
-var intro = {
+const intro = {
   type: 'object',
   properties: {
     type: { const: 'intro' },
@@ -159,10 +159,10 @@ var intro = {
   additionalProperties: false
 }
 
-var entryTypes = { correction, draft, intro, mark, note, reply }
+const entryTypes = { correction, draft, intro, mark, note, reply }
 
 Object.keys(entryTypes).forEach(function (name) {
-  var schema = entryTypes[name]
+  const schema = entryTypes[name]
   schema.title = name
   schema.properties.prior = digest
   schema.properties.index = index
@@ -171,10 +171,10 @@ Object.keys(entryTypes).forEach(function (name) {
   schema.required.sort()
 })
 
-var entry = {
+const entry = {
   title: 'entry',
   oneOf: Object.keys(entryTypes).map(function (name) {
-    return { '$ref': '#/definitions/' + name }
+    return { $ref: '#/definitions/' + name }
   }).sort(),
   definitions: entryTypes
 }
@@ -182,7 +182,7 @@ var entry = {
 // Envelopes enclose encrypted entries, exposing just enough
 // data to allow replication-only peers that know the
 // replication key to replicate data.
-var envelope = {
+const envelope = {
   title: 'envelope',
   type: 'object',
   properties: {
@@ -211,7 +211,7 @@ var envelope = {
 // References point to particular log entries by log public
 // key and integer index. Peers exchange references to offer
 // and request log entries.
-var reference = strictObjectSchema({
+const reference = strictObjectSchema({
   logPublicKey,
   index: { type: 'integer', minimum: 0 }
 })
@@ -221,7 +221,7 @@ reference.title = 'reference'
 // Invitations transmit replication keys, as well as
 // encrypted read and write keys, for use and storage
 // by account servers.
-var invitation = {
+const invitation = {
   title: 'invitation',
   type: 'object',
   properties: {

@@ -1,9 +1,9 @@
-var AJV = require('ajv')
-var crypto = require('@proseline/crypto')
-var tape = require('tape')
-var schemas = require('./')
+const AJV = require('ajv')
+const crypto = require('@proseline/crypto')
+const tape = require('tape')
+const schemas = require('./')
 
-var ajv = new AJV()
+const ajv = new AJV()
 
 // Validate top-level schemas.
 Object.keys(schemas).forEach(function (key) {
@@ -17,22 +17,22 @@ Object.keys(schemas).forEach(function (key) {
 })
 
 tape('invitation', function (test) {
-  var invitationEncryptionKey = crypto.random(crypto.encryptionKeyBytes)
+  const invitationEncryptionKey = crypto.random(crypto.encryptionKeyBytes)
 
-  var replicationKey = crypto.replicationKey()
+  const replicationKey = crypto.replicationKey()
 
-  var projectEncryptionKey = crypto.encryptionKey()
-  var projectEncryptionKeyNonce = crypto.nonce()
+  const projectEncryptionKey = crypto.encryptionKey()
+  const projectEncryptionKeyNonce = crypto.nonce()
 
-  var keyPair = crypto.keyPair()
-  var publicKey = keyPair.publicKey
-  var secretKey = keyPair.secretKey
-  var secretKeyNonce = crypto.nonce()
+  const keyPair = crypto.keyPair()
+  const publicKey = keyPair.publicKey
+  const secretKey = keyPair.secretKey
+  const secretKeyNonce = crypto.nonce()
 
-  var title = 'test project'
-  var titleNonce = crypto.nonce()
+  const title = 'test project'
+  const titleNonce = crypto.nonce()
 
-  var invitation = {
+  const invitation = {
     replicationKey,
     publicKey,
     encryptionKey: {
@@ -63,11 +63,11 @@ tape('invitation', function (test) {
 })
 
 tape('intro in envelope', function (test) {
-  var replicationKey = crypto.replicationKey()
-  var discoveryKey = crypto.discoveryKey(replicationKey)
-  var index = 1
-  var prior = crypto.hash(crypto.random(64))
-  var entry = {
+  const replicationKey = crypto.replicationKey()
+  const discoveryKey = crypto.discoveryKey(replicationKey)
+  const index = 1
+  const prior = crypto.hash(crypto.random(64))
+  const entry = {
     discoveryKey,
     index,
     prior,
@@ -81,12 +81,12 @@ tape('intro in envelope', function (test) {
   ajv.validate(schemas.entry, entry)
   test.deepEqual(ajv.errors, null, 'valid entry')
 
-  var logKeyPair = crypto.keyPair()
-  var projectKeyPair = crypto.keyPair()
-  var readKey = crypto.encryptionKey()
-  var logPublicKey = logKeyPair.publicKey
-  var nonce = crypto.nonce()
-  var envelope = {
+  const logKeyPair = crypto.keyPair()
+  const projectKeyPair = crypto.keyPair()
+  const readKey = crypto.encryptionKey()
+  const logPublicKey = logKeyPair.publicKey
+  const nonce = crypto.nonce()
+  const envelope = {
     discoveryKey,
     logPublicKey,
     index,
