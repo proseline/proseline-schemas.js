@@ -74,6 +74,8 @@ tape('intro in envelope', function (test) {
     type: 'intro',
     name: 'Kyle E. Mitchell',
     device: 'laptop',
+    email: 'kyle@example.com',
+    phone: '+15551234567',
     timestamp: new Date().toISOString()
   }
   ajv.validate(schemas.entry, entry)

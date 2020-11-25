@@ -139,12 +139,25 @@ var correction = strictObjectSchema({
 
 // Notes associates names and device, like "Kyle on laptop"
 // with logs.
-var intro = strictObjectSchema({
-  type: { const: 'intro' },
-  name: name,
-  device: name,
-  timestamp: timestamp
-})
+var intro = {
+  type: 'object',
+  properties: {
+    type: { const: 'intro' },
+    name: name,
+    device: name,
+    timestamp: timestamp,
+    email: { // optional
+      type: 'string',
+      format: 'email'
+    },
+    phone: { // optional
+      type: 'string',
+      pattern: '^\\+[0-9]+$'
+    }
+  },
+  required: ['type', 'name', 'device', 'timestamp'],
+  additionalProperties: false
+}
 
 var entryTypes = { correction, draft, intro, mark, note, reply }
 
