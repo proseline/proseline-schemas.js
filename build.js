@@ -4,12 +4,6 @@ const strictObjectSchema = require('strict-json-object-schema')
 
 // JSON Schemas reused below:
 
-const logPublicKey = base64String(crypto.publicKeyBytes)
-const signature = base64String(crypto.signatureBytes)
-const nonce = base64String(crypto.nonceBytes)
-const discoveryKey = base64String(crypto.digestBytes)
-const digest = base64String(crypto.digestBytes)
-
 const base64Pattern = (function makeBase64RegEx () {
   const CHARS = '[A-Za-z0-9+/]'
   return (
@@ -23,6 +17,12 @@ const base64Pattern = (function makeBase64RegEx () {
     '$'
   )
 })()
+
+const logPublicKey = base64String(crypto.publicKeyBytes)
+const signature = base64String(crypto.signatureBytes)
+const nonce = base64String(crypto.nonceBytes)
+const discoveryKey = base64String(crypto.digestBytes)
+const digest = base64String(crypto.digestBytes)
 
 function base64String (bytes) {
   if (bytes) {
